@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HistoryTales.ai</title>
+    <link rel="stylesheet" href="css/styles.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+    <h1>HistoryTales.ai- Your Story Generator Chatbot</h1>
+    <form id="storyForm">
+        <div>
+            <label for="event">Event:</label>
+            <input type="text" id="event" name="event" required>
+        </div>
+        <div>
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" name="genre" required>
+        </div>
+        <button type="submit">Generate Story</button>
+    </form>
+    <div class="spinner" id="spinner"></div>
+    <h2>Generated Story:</h2>
+    <div id="storyOutput"></div> <!-- Changed from <p> to <div> for better structure -->
+
+    <script>
+        document.getElementById('storyForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent the form from submitting the traditional way
+
+            // Show the spinner
+            document.getElementById('spinner').style.display = 'block';
+
+            // Clear the previous story
+            document.getElementById('storyOutput').innerHTML = '';
+
+            // Get user input
+            const event = document.getElementById('event').value;
+            const genre = document.getElementById('genre').value;
+
+            try {
+                // Send a POST request to the server
+                const response = await fetch('/generate-story', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ event, genre }), // Send user input as JSON
+                });
+
+                // Parse the JSON response
+                const data = await response.json();
+
+                // Hide the spinner
+                document.getElementById('spinner').style.display = 'none';
+
+                // Check if the response contains a story
+                if (data.story) {
+                    // Display the story word by word
+                    displayStoryWordByWord(data.story);
+                } else {
+                    // Display an error message if no story is generated
+                    document.getElementById('storyOutput').textContent = 'Failed to generate story: ' + (data.error || 'Unknown error');
+                }
+            } catch (error) {
+                // Handle any errors that occur during the fetch request
+                console.error('Error:', error);
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('storyOutput').textContent = 'An error occurred while generating the story.';
+            }
+        });
+
+        // Function to display the story word by word
+        function displayStoryWordByWord(story) {
+            const storyOutput = document.getElementById('storyOutput');
+            const words = story.split(' '); // Split the story into words
+            let index = 0;
+
+            // Function to add words one by one
+            function addWord() {
+                if (index < words.length) {
+                    // Create a span for the current word
+                    const wordSpan = document.createElement('span');
+                    wordSpan.textContent = words[index] + ' ';
+                    wordSpan.classList.add('fade-in'); // Add the fade-in animation
+                    storyOutput.appendChild(wordSpan);
+
+                    // Scroll to the bottom of the page
+                    scrollToBottom();
+
+                    // Check if the word ends with punctuation
+                    const word = words[index];
+                    if (/[.,;!?]/.test(word)) {
+                        // Add a longer delay after punctuation
+                        setTimeout(addWord, 500); // 500ms delay
+                    } else {
+                        // Normal delay
+                        setTimeout(addWord, 100); // 100ms delay
+                    }
+
+                    index++;
+                } else {
+                    // Add a blinking cursor at the end
+                    const cursor = document.createElement('span');
+                    cursor.classList.add('cursor');
+                    storyOutput.appendChild(cursor);
+
+                    // Scroll to the bottom of the page one last time
+                    scrollToBottom();
+                }
+            }
+
+            // Start adding words
+            addWord();
+        }
+
+        // Function to scroll to the bottom of the page
+        function scrollToBottom() {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth', // Smooth scrolling
+            });
+        }
+    </script>
+</body>
+</html>
