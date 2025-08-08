@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { Groq } = require('groq-sdk'); // Correct import
+const { Groq } = require('groq-sdk'); 
 
 const app = express();
 const port = 3000;
@@ -9,9 +9,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Initialize Groq client
+
 const groq = new Groq({
-    apiKey: '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' // Replace with your actual Groq API key
+    apiKey: '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' 
 });
 
 app.post('/generate-story', async (req, res) => {
@@ -25,15 +25,14 @@ app.post('/generate-story', async (req, res) => {
         const prompt = `Write a short fictional story under 500 words about ${event} in the ${genre} genre.`;
         console.log('Prompt:', prompt);
 
-        // Use the correct method for generating completions
         const response = await groq.chat.completions.create({
             messages: [
                 {
-                    role: 'user', // The role is 'user' for the input prompt
-                    content: prompt, // The prompt goes here
+                    role: 'user', 
+                    content: prompt,
                 },
             ],
-            model: 'mixtral-8x7b-32768', // Use the correct model name
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
             max_tokens: 1000,
             temperature: 0.7,
         });
@@ -67,7 +66,6 @@ function displayStoryWordByWord(story) {
             index++;
             setTimeout(addWord, 100);
         } else {
-            // Add a blinking cursor at the end
             const cursor = document.createElement('span');
             cursor.classList.add('cursor');
             storyOutput.appendChild(cursor);
@@ -78,7 +76,7 @@ function displayStoryWordByWord(story) {
 }
 
 function scrollToBottom() {
-    const isUserAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 50; // 50px threshold
+    const isUserAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 50; 
     if (isUserAtBottom) {
         window.scrollTo({
             top: document.body.scrollHeight,
@@ -89,4 +87,5 @@ function scrollToBottom() {
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+
 });
